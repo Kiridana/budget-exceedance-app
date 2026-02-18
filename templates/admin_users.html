@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Manage Users</h2>
+  <table class="table">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email or '-' }}</td>
+          <td>{{ u.role }}</td>
+          <td>
+            <form method="post" style="display:inline">
+              <input type="hidden" name="user_id" value="{{ u.id }}" />
+              <select name="role" class="form-select d-inline-block" style="width:150px">
+                <option value="PIC" {% if u.role=='PIC' %}selected{% endif %}>PIC</option>
+                <option value="Reviewer" {% if u.role=='Reviewer' %}selected{% endif %}>Reviewer</option>
+                <option value="Admin" {% if u.role=='Admin' %}selected{% endif %}>Admin</option>
+              </select>
+              <button class="btn btn-sm btn-primary">Save</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

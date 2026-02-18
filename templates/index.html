@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Trades</h2>
+  <ul class="list-group">
+    {% for trade in trades %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <span class="fw-bold">{{ trade.name }}</span><br>
+          {% if trade_pics[trade.id] %}
+            <span class="badge bg-secondary">PIC: {{ trade_pics[trade.id] }}</span><br>
+          {% else %}
+            <span class="text-muted">PIC: Not assigned</span><br>
+          {% endif %}
+          {% if trade_deadlines[trade.id] %}
+            <span class="badge bg-info text-dark">Deadline: {{ trade_deadlines[trade.id] }}</span><br>
+          {% else %}
+            <span class="text-muted">No deadline assigned</span><br>
+          {% endif %}
+          {% if trade_statuses[trade.id] %}
+            {% set status = trade_statuses[trade.id].lower() %}
+            {% if status == 'not submitted' %}
+              <span class="badge bg-secondary">Not Submitted</span>
+            {% elif status == 'submitted' %}
+              <span class="badge bg-primary">Submitted</span>
+            {% elif status == 'under review' or status == 'reviewed' %}
+              <span class="badge bg-warning text-dark">Under Review</span>
+            {% elif status == 'needs changes' %}
+              <span class="badge bg-danger">Needs Changes</span>
+            {% elif status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ trade_statuses[trade.id] }}</span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <a class="btn btn-sm btn-primary" href="/upload/{{ trade.id }}">Upload Explanation</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

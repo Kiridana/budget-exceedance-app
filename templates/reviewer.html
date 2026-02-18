@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Reviewer Dashboard</h2>
+  {% if single %}
+    <h3>Explanation for {{ explanations[0].trade.name }}</h3>
+    <p>Uploaded by: {{ explanations[0].user.name }} at {{ explanations[0].uploaded_at }}</p>
+    {% if explanations[0].filename %}
+      <a class="btn btn-outline-success btn-sm mb-3" href="/download/{{ explanations[0].id }}">
+        Download Submitted Excel
+      </a>
+    {% endif %}
+    <h5>Uploaded Explanation Data</h5>
+    {% if data %}
+      {% for sheet, rows in data.items() %}
+        <div class="mb-3">
+          <strong>{{ sheet }}</strong>
+          {% if rows and rows|length > 0 %}
+            <div style="max-height:200px; overflow:auto; border:1px solid #ccc;">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    {% for col in rows[0].keys() %}<th>{{ col }}</th>{% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in rows %}
+                    <tr>
+                      {% for col in rows[0].keys() %}<td>{{ row[col] }}</td>{% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">No data in this sheet.</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-muted">No explanation data uploaded.</div>
+    {% endif %}
+    <form method="post" class="p-3 rounded bg-light shadow-sm" style="max-width:500px;margin:auto;">
+      <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <option {% if explanations[0].status=='Not Submitted' %}selected{% endif %}>Not Submitted</option>
+          <option {% if explanations[0].status=='Submitted' %}selected{% endif %}>Submitted</option>
+          <option {% if explanations[0].status=='Under Review' or explanations[0].status=='Reviewed' %}selected{% endif %}>Under Review</option>
+          <option {% if explanations[0].status=='Needs Changes' %}selected{% endif %}>Needs Changes</option>
+          <option {% if explanations[0].status=='Completed' %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Deadline (set by Reviewer)</label>
+        <input class="form-control" name="deadline" placeholder="YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS" value="{{ explanations[0].deadline or '' }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Comments</label>
+        <textarea name="comments" class="form-control" rows="4">{{ explanations[0].reviewer_comments or '' }}</textarea>
+      </div>
+      <button class="btn btn-primary w-100">Save Review</button>
+    </form>
+  {% else %}
+    <form method="post">
+      <table class="table table-hover table-bordered align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th>Trade</th>
+            <th>PIC<br><small class="text-muted">(Assign by Reviewer)</small></th>
+            <th>Uploaded</th>
+            <th>Status</th>
+            <th>Deadline<br><small class="text-muted">(Assigned by Reviewer)</small></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in explanations %}
+            <tr>
+              <td class="fw-bold">{{ e.trade.name }}</td>
+              <td>
+                <div class="input-group input-group-sm">
+                  <select name="pic_id" class="form-select">
+                    {% for u in users %}
+                      <option value="{{ u.id }}" {% if u.id == e.user_id %}selected{% endif %}>{{ u.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="hidden" name="expl_id" value="{{ e.id }}" />
+                  <button class="btn btn-outline-secondary btn-sm" type="submit">Set</button>
+                </div>
+              </td>
+              <td>{{ e.uploaded_at }}</td>
+              <td><span class="badge bg-info text-dark">{{ e.status }}</span></td>
+              <td style="min-width:180px">
+                <div class="input-group input-group-sm">
+                  <input type="hidden" name="expl_id" value="{{ e.id }}" />
+                  <input type="text" class="form-control" name="deadline" value="{{ e.deadline or '' }}" placeholder="YYYY-MM-DD" aria-label="Deadline (assigned by reviewer)" />
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Set</button>
+                </div>
+                {% if not e.deadline %}
+                  <div class="form-text text-danger">No deadline assigned</div>
+                {% else %}
+                  <div class="form-text text-success">Assigned by Reviewer</div>
+                {% endif %}
+              </td>
+              <td>
+                <a class="btn btn-sm btn-outline-primary" href="/review/{{ e.id }}">Review</a>
+                {% if e.filename %}
+                  <a class="btn btn-sm btn-outline-success ms-1" href="/download/{{ e.id }}" title="Download Excel">Download</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
+  {% endif %}
+{% endblock %}

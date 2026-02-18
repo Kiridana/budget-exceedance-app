@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Manage Trades</h2>
+  <table class="table">
+    <thead><tr><th>Trade</th><th>Incharge</th><th>Assign</th></tr></thead>
+    <tbody>
+      {% for t in trades %}
+        <tr>
+          <td>{{ t.name }}</td>
+          <td>{{ t.incharge or '-' }}</td>
+          <td>
+            <form method="post">
+              <input type="hidden" name="trade_id" value="{{ t.id }}" />
+              <select name="incharge" class="form-select d-inline-block" style="width:200px">
+                <option value="">-- none --</option>
+                {% for u in users %}
+                  <option value="{{ u.name }}" {% if u.name==t.incharge %}selected{% endif %}>{{ u.name }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-sm btn-primary">Assign</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
